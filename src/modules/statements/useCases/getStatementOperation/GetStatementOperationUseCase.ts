@@ -26,13 +26,12 @@ export class GetStatementOperationUseCase {
       throw new GetStatementOperationError.UserNotFound();
     }
 
-    const statementOperation = await this.statementsRepository
-      .findStatementOperation({ user_id, statement_id });
+    const statementOperation = await this.statementsRepository.findStatementOperation({ user_id, statement_id });
 
-      if(!statementOperation) {
-        throw new GetStatementOperationError.StatementNotFound();
-      }
+    if(!statementOperation) {
+      throw new GetStatementOperationError.StatementNotFound();
+    }
 
-      return statementOperation;
+    return statementOperation;
   }
 }
