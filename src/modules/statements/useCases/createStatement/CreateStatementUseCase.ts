@@ -30,39 +30,45 @@ export class CreateStatementUseCase {
       throw new CreateStatementError.UserNotFound();
     }
 
-    if(type === 'withdraw') {
-      const { balance } = await this.statementsRepository.getUserBalance({ user_id });
+    const sender = await this.usersRepository.findById(String(sender_id));
 
-      if (balance < amount) {
-        throw new CreateStatementError.InsufficientFunds()
-      }
+    if (!sender && type === OperationType.TRANSFER) {
+      throw new CreateStatementError.SenderNotFound();
     }
 
     if(type === 'transfer') {
-      const { balance } = await this.statementsRepository.getUserBalance({ user_id });
+      const { balance } = await this.statementsRepository.getUserBalance({ user_id:String(sender_id) });
 
       if (balance < amount) {
         throw new CreateStatementError.InsufficientFunds()
       }
 
       const transferOperation = await this.statementsRepository.create({
-        user_id,
-        sender_id,
+        user_id: String(sender_id),
+        sender_id: user_id,
         type,
         amount,
         description
       });
 
       await this.statementsRepository.create({
-        user_id: String(sender_id),
-        sender_id: user_id,
+        user_id,
+        sender_id,
         type: OperationType.RECIVETRANSFER,
         amount,
-        description: `${user.name} te enviou a quantia de ${amount}`
+        description: `${sender?.name} te enviou a quantia de ${amount}`
       });
 
       return transferOperation;
 
+    }
+
+    if(type === 'withdraw') {
+      const { balance } = await this.statementsRepository.getUserBalance({ user_id });
+
+      if (balance < amount) {
+        throw new CreateStatementError.InsufficientFunds()
+      }
     }
 
     const statementOperation = await this.statementsRepository.create({

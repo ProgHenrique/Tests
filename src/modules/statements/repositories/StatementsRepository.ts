@@ -28,13 +28,17 @@ export class StatementsRepository implements IStatementsRepository {
       type
     });
 
-    return this.repository.save(statement);
+    await this.repository.save(statement);
+
+    return statement
   }
 
   async findStatementOperation({ statement_id, user_id }: IGetStatementOperationDTO): Promise<Statement | undefined> {
-    return this.repository.findOne(statement_id, {
+    const statement = await this.repository.findOne(statement_id, {
       where: { user_id }
     });
+
+    return statement
   }
 
   async getUserBalance({ user_id, with_statement = false }: IGetBalanceDTO):
